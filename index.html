@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hot Summer Fest</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Google Fonts – Orbitron for headings & Press Start 2P for neon text -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+/* ======================  Theme Variables  ====================== */
+:root {
+    /* Dark theme defaults – overridden by data-theme="dark" */
+    --bg-gradient-dark: linear-gradient(180deg, #0a0a23 0%, #000c33 100%);
+    --text-color-dark: #f1e9ff;
+    --accent-neon-pink: #ff4a9d;   /* neon pink */
+    --accent-neon-cyan: #00ffc0;   /* cyan */
+    --accent-neon-yellow:#ffbd2e;  /* yellow for accents */
+
+    /* Light theme defaults – overridden by data-theme="light" */
+    --bg-gradient-light: linear-gradient(180deg, #f8f9fa 0%, #e1e3e8 100%);
+    --text-color-light: #111;
+}
+
+/* Theme switch */
+body[data-theme="dark"] {
+    background-image: var(--bg-gradient-dark);
+    color: var(--text-color-dark);
+}
+body[data-theme="light"] {
+    background-image: var(--bg-gradient-light);
+    color: var(--text-color-light);
+}
+
+/* ======================  General Styles  ====================== */
+html, body {margin:0; padding:0; font-family:'Orbitron',sans-serif; line-height:1.6;}
+header {position:relative; text-align:center; padding:2rem 1rem;}
+footer {text-align:center; padding:1rem; font-size:.9rem;}
+
+h1,h2{margin-top:0;}
+a{text-decoration:none;color:inherit;}
+
+button, .btn{
+    cursor:pointer;
+    background-color:var(--accent-neon-pink);
+    color:#fff;
+    border:none;
+    padding:.75rem 1.5rem;
+    border-radius:4px;
+    font-size:1rem;
+    box-shadow:0 0 12px var(--accent-neon-pink),0 0 20px var(--accent-neon-cyan);
+}
+button:hover, .btn:hover{transform:scale(1.05);}
+
+/* Theme toggle button */
+.theme-toggle{
+    position:absolute; top:1rem; right:1rem;
+    background:none; border:none; color:inherit;
+    font-size:1.5rem;
+    transition:transform .2s;
+}
+.theme-toggle:hover{transform:rotate(20deg);}
+
+/* ======================  Neon Text (Glitch) ====================== */
+.neon{
+    font-family:'Press Start 2P',monospace;
+    font-size:4rem;
+    color:var(--accent-neon-pink);
+    text-shadow:
+        0 0 5px var(--accent-neon-cyan),
+        0 0 10px var(--accent-neon-cyan),
+        0 0 20px var(--accent-neon-cyan),
+        0 0 40px var(--accent-neon-cyan);
+    animation:glitch .08s infinite alternate;
+}
+@keyframes glitch{
+    from{text-shadow:0 0 10px var(--accent-neon-cyan);}
+    to{text-shadow:none;}
+}
+
+/* ======================  Hero Section ====================== */
+.hero{
+    min-height:60vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    background:url('https://source.unsplash.com/1600x900/?campfire') no-repeat center center/cover,
+                var(--bg-gradient-dark);
+    color:#fff; text-align:center; padding:1rem;
+}
+.hero h2{font-size:2.5rem;margin:.5rem 0;}
+.hero p{font-size:1.25rem;margin:.5rem 0;}
+#countdown{margin-top:.75rem;font-size:1.15rem;color:#ff39c8}
+
+/* ======================  Sections ====================== */
+section{padding:2rem 1rem; max-width:1200px; margin:auto;}
+ul{list-style:none;padding-left:0;}
+li{margin-bottom:.5rem;}
+.gallery{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:10px;
+}
+.gallery img{border-radius:8px;width:100%;height:auto;transition:transform .3s;}
+.gallery img:hover{transform:scale(1.05);}
+
+/* Map placeholder */
+.map-placeholder{
+    width:100%; height:300px;
+    background:#ccc;
+    display:flex; align-items:center; justify-content:center;
+    color:#555; font-size:1.2rem;
+    border-radius:8px;
+}
+
+/* Contact form */
+.contact-form input, .contact-form textarea{
+    width:100%; padding:.75rem; margin-bottom:1rem;
+    border:none; border-radius:4px; box-sizing:border-box;
+}
+.contact-form button{width:auto;}
+/* ======================  Responsive ====================== */
+@media(max-width:768px){
+    .neon{font-size:3rem;}
+    .hero h2{font-size:2rem;}
+    .hero p{font-size:1.1rem;}
+}
+
+/* ======================  Starfield Overlay (Optional) ====================== */
+.starfield{
+    position:absolute; inset:0;
+    background-image:
+        radial-gradient(circle, #fff 1px, transparent 1px),
+        linear-gradient(45deg, transparent 48%, rgba(255,255,255,.05) 52%),
+        linear-gradient(-45deg, transparent 48%, rgba(255,255,255,.05) 52%);
+    background-size: 4px 4px, 20px 20px, 20px 20px;
+    pointer-events:none;
+}
+</style>
+</head>
+
+<body data-theme="dark">
+<header>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+    <h1 class="neon">Hot Summer Fest</h1>
+</header>
+
+<section class="hero">
+    <!-- Optional starfield overlay for extra glow -->
+    <div class="starfield"></div>
+    <h2>Experience the Ultimate Camping Adventure!</h2>
+    <p>Join us for a weekend of music, fire pits & unforgettable memories.</p>
+    <div id="countdown"></div>
+    <a href="#tickets" class="btn">Get Tickets</a>
+</section>
+
+<section id="about">
+    <h2>About the Festival</h2>
+    <p>Hot Summer Fest is a 3‑day celebration of nature, music & community. Think neon tents, solar-powered stages and a lineup featuring <strong>The Neon Flames</strong>, <strong>Solar Strings</strong> and <strong>Firefly Echoes</strong>. Camp under the stars, dance to synth‑wave beats, and share stories around fire pits.</p>
+</section>
+
+<section id="schedule">
+    <h2>Schedule</h2>
+    <ul>
+        <li><strong>Day 1 (July 22)</strong>: Arrival & Camp Setup – Sunset Concerts by The Neon Flames</li>
+        <li><strong>Day 2 (July 23)</strong>: Full Day Activities – Fireworks, Yoga and Night Sessions with Solar Strings</li>
+        <li><strong>Day 3 (July 24)</strong>: Farewell Party & Early Morning Meditation with Firefly Echoes</li>
+    </ul>
+</section>
+
+<section id="tickets">
+    <h2>Tickets</h2>
+    <p>Choose your pass and secure your spot in the hottest camping event of the year.</p>
+    <a href="#" class="btn">Buy Now</a>
+</section>
+
+<section id="map">
+    <h2>Location</h2>
+    <div class="map-placeholder">Map Placeholder – Image #1</div>
+</section>
+
+<section id="gallery">
+    <h2>Gallery</h2>
+    <div class="gallery">
+        <img src="https://source.unsplash.com/300x200/?camping" alt="Campfire Night">
+        <img src="https://source.unsplash.com/300x200/?music" alt="Live Band">
+        <img src="https://source.unsplash.com/300x200/?summer" alt="Sunset">
+    </div>
+</section>
+
+<section id="contact">
+    <h2>Contact Us</h2>
+    <form class="contact-form">
+        <input type="text" placeholder="Your Name" required>
+        <input type="email" placeholder="Email Address" required>
+        <textarea rows="4" placeholder="Message"></textarea>
+        <button type="submit">Send Message</button>
+    </form>
+</section>
+
+<footer>
+    © 2025 Hot Summer Fest. All rights reserved.
+</footer>
+
+<script>
+// Theme toggle logic
+const themeToggle = document.getElementById('themeToggle');
+let currentTheme = 'dark';
+themeToggle.addEventListener('click', () => {
+    if (currentTheme === 'dark') {
+        currentTheme = 'light';
+        document.body.setAttribute('data-theme', 'light');
+        themeToggle.textContent = '☀️';
+    } else {
+        currentTheme = 'dark';
+        document.body.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '🌙';
+    }
+});
+
+// Countdown to festival start (July 22, 2025 12:00 PM)
+const targetDate = new Date('2025-07-22T12:00:00');
+function updateCountdown() {
+    const now = new Date();
+    let diff = targetDate - now;
+    if (diff < 0) { document.getElementById('countdown').textContent = 'Festival Started!'; return; }
+    const days   = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours  = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes= Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds= Math.floor((diff % (1000 * 60)) / 1000);
+    document.getElementById('countdown').textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
+</body>
+</html>
