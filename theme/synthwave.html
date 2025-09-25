@@ -7,6 +7,8 @@
 
 <!-- Google Fonts – Perfect synthwave combo -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="easter-egg.css">
+<script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
 
 <style>
 /* ======================  Theme Variables  ====================== */
@@ -22,6 +24,7 @@
     --neon-yellow: #ffff00;
     --neon-orange: #ff4500;
     --neon-green: #39ff14;
+    --neon-red: #ff0000;
     --text-primary: #ffffff;
     --text-secondary: #b3b3ff;
     --text-muted: #7a7a9a;
@@ -173,6 +176,18 @@ body.light-theme .bg-grid {
     background-image: 
         linear-gradient(rgba(99, 102, 241, 0.15) 1px, transparent 1px),
         linear-gradient(90deg, rgba(99, 102, 241, 0.15) 1px, transparent 1px);
+}
+
+/* Light theme easter egg styles */
+body.light-theme .replicant-detected-overlay {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+body.light-theme .replicant-detected-message {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: var(--accent-light);
+    color: var(--text-light);
+    text-shadow: none;
 }
 
 /* ======================  Typography  ====================== */
@@ -1473,6 +1488,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 
     // Keyboard shortcuts
+    let replicantCode = [];
+    const replicantSequence = [
+        'KeyR', 'KeyE', 'KeyP'
+    ];
+
     document.addEventListener('keydown', (e) => {
         if (e.target.matches('input, textarea')) return;
         
@@ -1494,6 +1514,37 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key.toLowerCase() === 'p') {
             createParticles();
         }
+
+        // Replicant easter egg
+        replicantCode.push(e.code);
+        if (replicantCode.length > replicantSequence.length) {
+            replicantCode.shift();
+        }
+
+        if (JSON.stringify(replicantCode) === JSON.stringify(replicantSequence)) {
+            const overlay = document.createElement('div');
+            overlay.className = 'replicant-detected-overlay';
+            document.body.appendChild(overlay);
+
+            const message = document.createElement('div');
+            message.className = 'replicant-detected-message';
+            message.innerHTML = `
+                <div>VOIGHT-KAMPFF TEST</div>
+                <pre>
+[Incoming Transmission...]
+ANALYSIS: Empathy response deviation detected.
+CONCLUSION: Replicant signature confirmed.
+                </pre>
+            `;
+            document.body.appendChild(message);
+
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+                document.body.removeChild(message);
+            }, 5000);
+
+            replicantCode = [];
+        }
     });
 
     // Performance optimization - reduce particles on resize
@@ -1509,6 +1560,57 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         document.body.classList.remove('loading');
     }, 500);
+});
+</script>
+<script>
+// Synthwave sound with Tone.js
+document.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === 'm' && !e.target.matches('input, textarea')) {
+        e.preventDefault();
+
+        // Lazy load the synth to avoid creating it if not used
+        if (typeof window.synth === 'undefined') {
+            // Create a synth and connect it to the main output (your speakers)
+            window.synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: {
+                    type: "fmsquare",
+                    modulationType: "sawtooth",
+                    modulationIndex: 3,
+                    harmonicity: 3.4
+                },
+                envelope: {
+                    attack: 0.001,
+                    decay: 0.1,
+                    sustain: 0.1,
+                    release: 0.1
+                }
+            }).toDestination();
+
+            // Add some effects
+            const chorus = new Tone.Chorus("4n", 2.5, 0.7).toDestination().start();
+            const reverb = new Tone.Reverb({
+                decay: 1.5,
+                wet: 0.7
+            }).toDestination();
+            window.synth.connect(chorus);
+            window.synth.connect(reverb);
+
+            // A simple synthwave progression
+            window.sequence = new Tone.Sequence((time, note) => {
+                window.synth.triggerAttackRelease(note, "8n", time);
+            }, ["C4", "E4", "G4", "B4", "G4", "E4"], "4n").start(0);
+        }
+
+        // Start the audio context on user gesture
+        Tone.start();
+        
+        // Toggle playback
+        if (Tone.Transport.state === "started") {
+            Tone.Transport.pause();
+        } else {
+            Tone.Transport.start();
+        }
+    }
 });
 </script>
 </body>
