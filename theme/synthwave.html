@@ -1257,7 +1257,7 @@ footer {
         </div>
         <p style="font-size: 1rem; margin-bottom: 1rem;">© 2026 Hot Summer Fest. All rights reserved.</p>
         <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem;">Infoline: +1 416-22-MUSIC | Website: hotsummerfest.ca</p>
-        <p style="font-size: 0.8rem; opacity: 0.6;">Press 'T' to toggle theme • Press 'G' for glitch effect</p>
+        <p style="font-size: 0.8rem; opacity: 0.6;">Press 'T' to toggle theme • Press 'G' for glitch effect • Press 'M' for music • ← → to change tracks</p>
     </footer>
 
 <script>
@@ -1562,56 +1562,386 @@ CONCLUSION: Replicant signature confirmed.
     }, 500);
 });
 </script>
+
 <script>
-// Synthwave sound with Tone.js
-document.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'm' && !e.target.matches('input, textarea')) {
-        e.preventDefault();
+// Enhanced Synthwave sound with Tone.js - Multiple Tracks
+let currentTrack = 0;
+let isPlaying = false;
+let synthSetup = false;
 
-        // Lazy load the synth to avoid creating it if not used
-        if (typeof window.synth === 'undefined') {
-            // Create a synth and connect it to the main output (your speakers)
-            window.synth = new Tone.PolySynth(Tone.Synth, {
-                oscillator: {
-                    type: "fmsquare",
-                    modulationType: "sawtooth",
-                    modulationIndex: 3,
-                    harmonicity: 3.4
-                },
-                envelope: {
-                    attack: 0.001,
-                    decay: 0.1,
-                    sustain: 0.1,
-                    release: 0.1
-                }
-            }).toDestination();
+// Track configurations
+const synthwaveTracks = [
+    {
+        name: "Neon Dreams",
+        bpm: 110,
+        chords: [
+            ["A3", "C4", "E4"],  // Am
+            ["F3", "A3", "C4"],  // F  
+            ["C3", "E3", "G3"],  // C
+            ["G3", "B3", "D4"]   // G
+        ],
+        bass: ["A2", "F2", "C3", "G2"],
+        pads: [
+            ["A4", "C5", "E5"],
+            ["F4", "A4", "C5"], 
+            ["C4", "E4", "G4"],
+            ["G4", "B4", "D5"]
+        ],
+        arp: [
+            "A5", "C6", "E6", "A6", "E6", "C6",
+            "F5", "A5", "C6", "F6", "C6", "A5", 
+            "C5", "E5", "G5", "C6", "G5", "E5",
+            "G5", "B5", "D6", "G6", "D6", "B5"
+        ]
+    },
+    {
+        name: "Cyber Highway", 
+        bpm: 130,
+        chords: [
+            ["E3", "G#3", "B3"], // Em
+            ["C3", "E3", "G3"],  // C
+            ["D3", "F#3", "A3"], // D
+            ["B2", "D#3", "F#3"] // B
+        ],
+        bass: ["E2", "C2", "D2", "B1"],
+        pads: [
+            ["E4", "G#4", "B4"],
+            ["C4", "E4", "G4"],
+            ["D4", "F#4", "A4"], 
+            ["B3", "D#4", "F#4"]
+        ],
+        arp: [
+            "E5", "B5", "G#5", "E6", "B5", "G#5",
+            "C5", "G5", "E5", "C6", "G5", "E5",
+            "D5", "A5", "F#5", "D6", "A5", "F#5", 
+            "B4", "F#5", "D#5", "B5", "F#5", "D#5"
+        ]
+    },
+    {
+        name: "Starlight Cruiser",
+        bpm: 95,
+        chords: [
+            ["F3", "A3", "C4"],  // F
+            ["G3", "B3", "D4"],  // G
+            ["A3", "C4", "E4"],  // Am
+            ["G3", "B3", "D4"]   // G
+        ],
+        bass: ["F2", "G2", "A2", "G2"],
+        pads: [
+            ["F4", "A4", "C5"],
+            ["G4", "B4", "D5"],
+            ["A4", "C5", "E5"],
+            ["G4", "B4", "D5"]
+        ],
+        arp: [
+            "F5", "A5", "C6", "F6", "C6", "A5",
+            "G5", "B5", "D6", "G6", "D6", "B5",
+            "A5", "C6", "E6", "A6", "E6", "C6",
+            "G5", "B5", "D6", "G6", "D6", "B5"
+        ]
+    },
+    {
+        name: "Digital Sunset",
+        bpm: 85,
+        chords: [
+            ["C3", "E3", "G3"],  // C
+            ["A2", "C3", "E3"],  // Am
+            ["F3", "A3", "C4"],  // F
+            ["G3", "B3", "D4"]   // G
+        ],
+        bass: ["C2", "A1", "F2", "G2"],
+        pads: [
+            ["C5", "E5", "G5"],
+            ["A4", "C5", "E5"],
+            ["F4", "A4", "C5"],
+            ["G4", "B4", "D5"]
+        ],
+        arp: [
+            "C6", "G5", "E5", "C5", "E5", "G5",
+            "A5", "E5", "C5", "A4", "C5", "E5",
+            "F5", "C5", "A4", "F4", "A4", "C5",
+            "G5", "D5", "B4", "G4", "B4", "D5"
+        ]
+    },
+    {
+        name: "Void Runner",
+        bpm: 140,
+        chords: [
+            ["D3", "F#3", "A3"], // D
+            ["B2", "D3", "F#3"], // Bm
+            ["G3", "B3", "D4"],  // G
+            ["A3", "C#4", "E4"]  // A
+        ],
+        bass: ["D2", "B1", "G2", "A2"],
+        pads: [
+            ["D4", "F#4", "A4"],
+            ["B3", "D4", "F#4"],
+            ["G4", "B4", "D5"],
+            ["A4", "C#5", "E5"]
+        ],
+        arp: [
+            "D5", "A5", "F#5", "D6", "A5", "F#5",
+            "B4", "F#5", "D5", "B5", "F#5", "D5",
+            "G5", "D5", "B4", "G5", "D6", "B5",
+            "A5", "E5", "C#5", "A5", "E6", "C#6"
+        ]
+    }
+];
 
-            // Add some effects
-            const chorus = new Tone.Chorus("4n", 2.5, 0.7).toDestination().start();
-            const reverb = new Tone.Reverb({
-                decay: 1.5,
-                wet: 0.7
-            }).toDestination();
-            window.synth.connect(chorus);
-            window.synth.connect(reverb);
+function setupSynthwave() {
+    if (synthSetup) return;
+    synthSetup = true;
 
-            // A simple synthwave progression
-            window.sequence = new Tone.Sequence((time, note) => {
-                window.synth.triggerAttackRelease(note, "8n", time);
-            }, ["C4", "E4", "G4", "B4", "G4", "E4"], "4n").start(0);
+    // Create synth instruments
+    window.leadSynth = new Tone.PolySynth(Tone.Synth, {
+        oscillator: {
+            type: "fatsawtooth",
+            detune: 0,
+            spread: 40
+        },
+        filter: {
+            Q: 12,
+            type: "lowpass", 
+            rolloff: -24,
+            frequency: 1200
+        },
+        envelope: {
+            attack: 0.1,
+            decay: 0.3,
+            sustain: 0.4,
+            release: 2.0
+        },
+        filterEnvelope: {
+            attack: 0.05,
+            decay: 0.2,
+            sustain: 0.3,
+            release: 1.5,
+            baseFrequency: 600,
+            octaves: 2.5,
+            exponent: 2
         }
+    });
 
-        // Start the audio context on user gesture
+    window.bassSynth = new Tone.MonoSynth({
+        oscillator: {
+            type: "triangle",
+            modulationType: "sine",
+            modulationIndex: 2,
+            harmonicity: 0.5
+        },
+        filter: {
+            Q: 6,
+            type: "lowpass",
+            rolloff: -24,
+            frequency: 300
+        },
+        envelope: {
+            attack: 0.02,
+            decay: 0.1,
+            sustain: 0.8,
+            release: 1.0
+        },
+        filterEnvelope: {
+            attack: 0.01,
+            decay: 0.1,
+            sustain: 0.4,
+            release: 0.8,
+            baseFrequency: 100,
+            octaves: 3
+        }
+    });
+
+    window.padSynth = new Tone.PolySynth(Tone.Synth, {
+        oscillator: {
+            type: "sine",
+            partials: [0, 2, 3, 4]
+        },
+        envelope: {
+            attack: 2.0,
+            decay: 1.0,
+            sustain: 0.3,
+            release: 4.0
+        }
+    });
+
+    window.arpSynth = new Tone.Synth({
+        oscillator: {
+            type: "square",
+            modulationType: "sine",
+            modulationIndex: 0.5,
+            harmonicity: 1.2
+        },
+        envelope: {
+            attack: 0.005,
+            decay: 0.1,
+            sustain: 0.0,
+            release: 0.1
+        }
+    });
+
+    // Effects chain
+    const masterReverb = new Tone.Reverb({
+        decay: 4.0,
+        wet: 0.6,
+        preDelay: 0.1
+    }).toDestination();
+
+    const delay = new Tone.PingPongDelay({
+        delayTime: "8n",
+        feedback: 0.3,
+        wet: 0.2
+    }).connect(masterReverb);
+
+    const chorus = new Tone.Chorus({
+        frequency: 0.5,
+        delayTime: 3.5,
+        depth: 0.7,
+        wet: 0.3
+    }).connect(delay).start();
+
+    const distortion = new Tone.Distortion({
+        distortion: 0.2,
+        wet: 0.1
+    }).connect(chorus);
+
+    window.filter = new Tone.Filter({
+        frequency: 3000,
+        Q: 1,
+        type: "lowpass"
+    }).connect(distortion);
+
+    const compressor = new Tone.Compressor({
+        threshold: -12,
+        ratio: 4,
+        attack: 0.003,
+        release: 0.1
+    }).connect(window.filter);
+
+    // Connect synths
+    window.leadSynth.connect(compressor);
+    window.bassSynth.connect(compressor);
+    window.padSynth.connect(masterReverb);
+    window.arpSynth.connect(delay);
+
+    // Filter automation
+    window.filterLFO = new Tone.LFO(0.1, 1000, 4000).start();
+    window.filterLFO.connect(window.filter.frequency);
+}
+
+function loadTrack(trackIndex) {
+    if (window.chordSequence) window.chordSequence.dispose();
+    if (window.bassSequence) window.bassSequence.dispose();  
+    if (window.padSequence) window.padSequence.dispose();
+    if (window.arpSequence) window.arpSequence.dispose();
+
+    const track = synthwaveTracks[trackIndex];
+    Tone.Transport.bpm.value = track.bpm;
+
+    // Create sequences
+    window.chordSequence = new Tone.Sequence((time, chord) => {
+        window.leadSynth.triggerAttackRelease(chord, "2n", time);
+    }, track.chords, "2n").start(0);
+
+    window.bassSequence = new Tone.Sequence((time, note) => {
+        window.bassSynth.triggerAttackRelease(note, "4n", time);
+    }, track.bass, "2n").start(0);
+
+    window.padSequence = new Tone.Sequence((time, chord) => {
+        window.padSynth.triggerAttackRelease(chord, "1n", time);
+    }, track.pads, "1n").start(0);
+
+    window.arpSequence = new Tone.Sequence((time, note) => {
+        window.arpSynth.triggerAttackRelease(note, "16n", time);
+    }, track.arp, "16n").start(0);
+
+    // Show track name
+    showTrackNotification(track.name);
+}
+
+function showTrackNotification(trackName) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border: 2px solid var(--neon-cyan);
+        border-radius: 20px;
+        padding: 2rem 3rem;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--neon-cyan);
+        text-shadow: 0 0 20px var(--neon-cyan);
+        z-index: 10000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+    notification.textContent = `♪ ${trackName} ♪`;
+    document.body.appendChild(notification);
+
+    requestAnimationFrame(() => {
+        notification.style.opacity = '1';
+    });
+
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 2000);
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, textarea')) return;
+
+    // Press 'M' to toggle music
+    if (e.key.toLowerCase() === 'm') {
+        e.preventDefault();
+        setupSynthwave();
         Tone.start();
-        
-        // Toggle playback
-        if (Tone.Transport.state === "started") {
+
+        if (isPlaying) {
             Tone.Transport.pause();
+            isPlaying = false;
         } else {
+            if (!window.chordSequence) {
+                loadTrack(currentTrack);
+            }
+            Tone.Transport.start();
+            isPlaying = true;
+        }
+    }
+
+    // Left arrow - previous track  
+    if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setupSynthwave();
+        currentTrack = (currentTrack - 1 + synthwaveTracks.length) % synthwaveTracks.length;
+        loadTrack(currentTrack);
+        
+        if (isPlaying) {
+            Tone.start();
+            Tone.Transport.start();
+        }
+    }
+
+    // Right arrow - next track
+    if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setupSynthwave();
+        currentTrack = (currentTrack + 1) % synthwaveTracks.length;
+        loadTrack(currentTrack);
+        
+        if (isPlaying) {
+            Tone.start();
             Tone.Transport.start();
         }
     }
 });
 </script>
-</body>
-</html>
